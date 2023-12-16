@@ -5,7 +5,11 @@
  * esp_curl_transaction.php file or the esp_socket_transaction.php file depending on the
  * installed componenets
  */
+
 namespace Esp;
+
+use Exception;
+
 class EspHttpTransaction
 {
 	//Request
@@ -36,8 +40,7 @@ class EspHttpTransaction
 	}
 
 	public function __destruct()
-	{
-		;
+	{;
 	}
 
 	/**
@@ -100,10 +103,8 @@ class EspHttpTransaction
 	 */
 	public function addQueryParams($params)
 	{
-		if (is_array($params))
-		{
-			foreach ($params as $key => $value)
-			{
+		if (is_array($params)) {
+			foreach ($params as $key => $value) {
 				$this->addQueryParam($key, $value);
 			}
 		}
@@ -121,11 +122,9 @@ class EspHttpTransaction
 
 	public function getRequestHeader($headerName)
 	{
-		foreach ($this->requestHeaders as $key => $header)
-		{
+		foreach ($this->requestHeaders as $key => $header) {
 			$headerArray = explode(": ", $header);
-			if ($headerArray[0] === $headerName)
-			{
+			if ($headerArray[0] === $headerName) {
 				return $headerArray[1];
 			}
 		}
@@ -134,11 +133,9 @@ class EspHttpTransaction
 
 	public function removeRequestHeader($headerName)
 	{
-		foreach ($this->requestHeaders as $key => $header)
-		{
+		foreach ($this->requestHeaders as $key => $header) {
 			$headerArray = explode(": ", $header);
-			if ($headerArray[0] === $headerName)
-			{
+			if ($headerArray[0] === $headerName) {
 				unset($this->requestHeaders[$key]);
 			}
 		}
@@ -149,12 +146,9 @@ class EspHttpTransaction
 	 * */
 	public function getResponseBody()
 	{
-		if ($this->responseOK() || !empty($this->responseBody))
-		{
+		if ($this->responseOK() || !empty($this->responseBody)) {
 			return $this->responseBody;
-		}
-		else
-		{
+		} else {
 			return $this->getResponseStatus();
 		}
 	}
@@ -171,12 +165,9 @@ class EspHttpTransaction
 	public function getResponseStatusCode()
 	{
 		$header = $this->getResponseHeaders();
-		if (preg_match("/[0-9][0-9][0-9]/", $header[0], $code))
-		{
+		if (preg_match("/[0-9][0-9][0-9]/", $header[0], $code)) {
 			return (int) $code[0];
-		}
-		else
-		{
+		} else {
 			return 0;
 		}
 	}
@@ -189,12 +180,9 @@ class EspHttpTransaction
 
 	public function getResponseHeaders()
 	{
-		if (!isset($this->responseHeader))
-		{
+		if (!isset($this->responseHeader)) {
 			return null;
-		}
-		else
-		{
+		} else {
 			return $this->responseHeader;
 		}
 	}
@@ -202,10 +190,8 @@ class EspHttpTransaction
 	public function getResponseHeader($headerName)
 	{
 		$headers = $this->getResponseHeaders();
-		foreach ($headers as $header)
-		{
-			if (strpos($header, $headerName) === 0)
-			{
+		foreach ($headers as $header) {
+			if (strpos($header, $headerName) === 0) {
 				return trim(subStr($header, (strlen($headerName) + 1)));
 			}
 		}
@@ -235,32 +221,25 @@ class EspHttpTransaction
 		*/
 
 		//set url
-		if (isset($this->service))
-		{
+		if (isset($this->service)) {
 			$url = $this->requestURL . '/' . $this->service;
-		}
-		else
-		{
+		} else {
 			$url = $this->requestURL;
 		}
-		if (isset($this->queryParams) && sizeof($this->queryParams) > 0)
-		{
+		if (isset($this->queryParams) && sizeof($this->queryParams) > 0) {
 			$sep = "?";
-			foreach ($this->queryParams as $queryKey => $queryValue)
-			{
+			foreach ($this->queryParams as $queryKey => $queryValue) {
 				$url = $url . $sep . urlencode($queryKey) . "=" . urlencode($queryValue);
 				$sep = "&";
 			}
 		}
 
-		try
-		{
+		try {
 			curl_setopt($ch, CURLOPT_URL, $url);
 
 			//set session state
 			$sessionState = $this->getSessionState();
-			if (isset($sessionState))
-			{
+			if (isset($sessionState)) {
 				curl_setopt($ch, CURLOPT_COOKIE, $this->espSessionCookie . "=" . $sessionState);
 			}
 			//Set the method (note webdav uses custom requests)
@@ -277,18 +256,14 @@ class EspHttpTransaction
 			curl_setopt($ch, CURLOPT_HEADER, true);
 
 			// Figure out the client IP address
+			// Figure out the client IP address
 			$ip = "";
-			if (!empty($_SERVER['HTTP_CLIENT_IP']))
-			{
+			if (isset($_SERVER['HTTP_CLIENT_IP'])) {
 				$ip = $_SERVER['HTTP_CLIENT_IP'];
-			}
-			elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
-			{
+			} elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 				$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-			}
-			else
-			{
-				$ip = $_SERVER['REMOTE_ADDR'];
+			} else {
+				if (isset($_SERVER['REMOTE_ADDR'])) $ip = $_SERVER['REMOTE_ADDR'];
 			}
 
 			//Set Request Headers
@@ -296,11 +271,12 @@ class EspHttpTransaction
 
 			// We only need to send the forwarded-for header if our client IP address is
 			// different to our server-ip address
-			if ($_SERVER["SERVER_ADDR"] != $ip)
-				$reqHeaders[] = "X-Forwarded-For: " . $ip;
-
-			if (isset($data))
-			{
+			if (isset($_SERVER["SERVER_ADDR"])) {
+				if ($_SERVER["SERVER_ADDR"] != $ip) {
+					$reqHeaders[] = "X-Forwarded-For: " . $ip;
+				}
+			}
+			if (isset($data)) {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 				$reqHeaders[] = 'Content-Length: ' . strlen($data);
 			}
@@ -308,7 +284,9 @@ class EspHttpTransaction
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $reqHeaders);
 
 			// This will ensure our server knows about the client user agent
-			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
+			if (isset($_SERVER["HTTP_USER_AGENT"])) {
+				curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
+			} 
 
 			//Execute the request
 			$response    = curl_exec($ch);
@@ -317,25 +295,18 @@ class EspHttpTransaction
 			curl_close($ch);
 			$headers            = substr($response, 0, $header_size);
 			$this->responseBody = substr($response, $header_size);
-			if (isset($headers))
-			{
+			if (isset($headers)) {
 				// Get our headers into an array
 				$this->responseHeader = explode("\r\n", $headers);
 			}
-			if ($response === false)
-			{
+			if ($response === false) {
 				//Error handling
 				throw (new TransportFailureException("Transport operation failed. " . $url . ":" . $curlError));
-			}
-			else if ($this->responseOK() == 0)
-			{
+			} else if ($this->responseOK() == 0) {
 				//Error handling
 				throw (new TransportFailureException("Transport operation failed. " . $this->responseBody));
 			}
-
-		}
-		catch (TransportFailureException $ex)
-		{
+		} catch (TransportFailureException $ex) {
 			throw $ex;
 		}
 		//Store Cookie
@@ -347,10 +318,8 @@ class EspHttpTransaction
 	protected function storeResponseSessionCookie()
 	{
 		$this->sessionUpdated = false;
-		foreach ($this->getResponseHeaders() as $value)
-		{
-			if (preg_match('~^Set-Cookie:\s+.*' . $this->espSessionCookie . '=([^;]*)~mi', $value, $cookie))
-			{
+		foreach ($this->getResponseHeaders() as $value) {
+			if (preg_match('~^Set-Cookie:\s+.*' . $this->espSessionCookie . '=([^;]*)~mi', $value, $cookie)) {
 				// if (preg_match("/Set-Cookie: " . $this->espSessionCookie . "=(.*?)($|;)(.*?expires=(.*?)($|;)|.*)/si", $value, $cookie)) {
 				$this->setSessionState($cookie[1]);
 				$this->sessionUpdated = true;
@@ -371,18 +340,12 @@ class EspHttpTransaction
 
 	public function getError()
 	{
-		if (isset($error))
-		{
+		if (isset($error)) {
 			return $error;
-		}
-		else if (!$this->responseOk())
-		{
+		} else if (!$this->responseOk()) {
 			return "Request Failed, server responded : " . $this->getResponseStatus();
-		}
-		else
-		{
+		} else {
 			return null;
 		}
 	}
-
 }

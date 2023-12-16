@@ -6,14 +6,16 @@ Integration
 ===
 Various Hornbill Integration methods are documented here: https://wiki.hornbill.com/index.php/Integration
 
+When calling a method endpoint, specify the type you're intending to hit (xmlmc, websocket, webdav). 
+
 Using API Keys
 ===
 
 The easiest way to call Hornbill API's is to use an API Key. These are associated to users in the Administration Tool and are passed with every API Call removing the need to login.
 ```
 //-- Initiate XmlmcService instance
-$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-$mc            = new \Esp\MethodCall($the_transport);
+$the_transport = new \Esp\Transport(self::ESP_ADDRESS); 
+$mc            = new \Esp\MethodCall($the_transport, "xmlmc");
 
 //-- Set API Key
 $mc->setAPIKey("521c5f8f138a43e58af87fea9f3a201c");
@@ -32,8 +34,8 @@ Using Hornbill API's require an authenticated session. To create a session manua
 
 ```
 //-- Initiate XmlmcService instance
-$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-$mc            = new \Esp\MethodCall($the_transport);
+$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+$mc            = new \Esp\MethodCall($the_transport, "xmlmc");
 
 //-- Add Username
 $mc->addParam("userId", "admin");

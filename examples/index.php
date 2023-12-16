@@ -7,7 +7,7 @@ class TestOfEspMethods
 {
 
 	const ESP_ADDRESS = "https://eurapi.hornbill.com/yourinstancename/";
-	const API_KEY = "yourAPIKey";
+	const API_KEY = "yourAPIkey";
 
 	function buildResponse($strMethod, $strService, $strType, $strResponse = "")
 	{
@@ -23,8 +23,8 @@ class TestOfEspMethods
 	function testSimpleType()
 	{
 		$arrReturn     = array();
-		$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc            = new \Esp\MethodCall($the_transport);
+		$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc            = new \Esp\MethodCall($the_transport, 'xmlmc'); 
 
 		$mc->addParam("userId", "admin");
 		$mc->addPasswordParam("password", "password");
@@ -57,8 +57,8 @@ class TestOfEspMethods
 		$arrReturn        = array();
 		$strCheckSpelling = "Hornbill ! $ % ^  * ( ) _ + @ ~ . , / ' ' < > & \" 'Service Manager' Spelling Mitsake";
 
-		$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc            = new \Esp\MethodCall($the_transport);
+		$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc            = new \Esp\MethodCall($the_transport, 'xmlmc');
 
 		$mc->setAPIKey(self::API_KEY);
 		$mc->invoke("session", "getSessionInfo");
@@ -73,8 +73,8 @@ class TestOfEspMethods
 	{
 		$arrReturn        = array();
 		$strCheckSpelling = "Hornbill ! $ % ^  * ( ) _ + @ ~ . , / ' ' < > & \" 'Service Manager' Spelling Mitsake";
-		$the_transport    = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc               = new \Esp\MethodCall($the_transport);
+		$the_transport    = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc               = new \Esp\MethodCall($the_transport, 'xmlmc');
 		$mc->setAPIKey(self::API_KEY);
 
 		$mc->addParam("sentenceText", $strCheckSpelling);
@@ -107,11 +107,12 @@ class TestOfEspMethods
 		return $arrReturn;
 	}
 
+	
 	function testBuildXMLAndComplexType()
 	{
 		$arrReturn     = array();
-		$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc            = new \Esp\MethodCall($the_transport);
+		$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc            = new \Esp\MethodCall($the_transport, 'xmlmc');
 		$mc->setAPIKey(self::API_KEY);
 
 		$doc = new \Esp\XmlWriter();
@@ -147,8 +148,8 @@ class TestOfEspMethods
 	function testReturnXML()
 	{
 		$arrReturn     = array();
-		$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc            = new \Esp\MethodCall($the_transport);
+		$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc            = new \Esp\MethodCall($the_transport, 'xmlmc');
 
 		$mc->setAPIKey(self::API_KEY);
 
@@ -179,8 +180,8 @@ class TestOfEspMethods
 	function testException()
 	{
 		$arrReturn     = array();
-		$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc            = new \Esp\MethodCall($the_transport);
+		$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc            = new \Esp\MethodCall($the_transport, 'xmlmc');
 
 		$mc->addParam("userId", "admin");
 		$mc->addPasswordParam("password", "password");
@@ -202,9 +203,9 @@ class TestOfEspMethods
 	function test_i18n()
 	{
 		$arrReturn     = array();
-		$the_transport = new \Esp\Transport(self::ESP_ADDRESS, "xmlmc", "dav");
-		$mc            = new \Esp\MethodCall($the_transport);
-		$mc->setAPIKey(self::API_KEY);-
+		$the_transport = new \Esp\Transport(self::ESP_ADDRESS);
+		$mc            = new \Esp\MethodCall($the_transport, 'xmlmc');
+		$mc->setAPIKey(self::API_KEY);
 
 		$strGerman = "Dies ist eine Rechtschreibprufung";
 		array_push($arrReturn, $this->buildResponse("utility", "spellCheck", "DEBUG", "German string to Spell Check: " . $strGerman));
@@ -234,11 +235,13 @@ class TestOfEspMethods
 //Start running all the test cases to produce the report.
 $test = new TestOfEspMethods();
 
+
 //testSimpleType
 echo ("<b>testSimpleType</b>");
 echo ("<pre>");
 print_r($test->testSimpleType());
 echo ("</pre>");
+
 
 //testAPIKeySession
 echo ("<b>testAPIKeySession</b>");
@@ -251,6 +254,7 @@ echo ("<b>testReturnParamAsCountAndArray</b>");
 echo ("<pre>");
 print_r($test->testReturnParamAsCountAndArray());
 echo ("</pre>");
+
 
 //testBuildXMLAndComplexType
 echo ("<b>testBuildXMLAndComplexType</b>");

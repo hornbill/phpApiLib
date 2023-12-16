@@ -1,5 +1,6 @@
 <?php
 namespace Esp;
+use Exception;
 
 require_once("esp_http_transaction.php");
 require_once("esp_xmlmc_transaction.php");
@@ -10,7 +11,8 @@ require_once("esp_exception.php");
 /**
  * Description of ESPMethodCall
  * Invokes the ESP API
- *
+ * 
+ * Will take either xmlmc(API), ws(Websocket), dav(Dav) during creation
  * @author TrevorH
  */
 class MethodCall extends EspXmlmcTransaction
@@ -21,9 +23,19 @@ class MethodCall extends EspXmlmcTransaction
 	protected $startXml = '<methodCall>';
 	protected $endXml = '</methodCall>';
 
-	public function __construct($transportObj)
+
+	public function __construct($transportObj, $endpoint)
 	{
-		parent::__construct($transportObj->getServerPath());
+		if ($endpoint === 'ws') {
+			parent::__construct($transportObj->getWsPath());
+		} else if ($endpoint === 'dav') {
+			parent::__construct($transportObj->getDavPath());
+		} else if ($endpoint === 'xmlmc') {
+			parent::__construct($transportObj->getAPIPath());
+		}else {
+			throw new Exception('No known endpoint specified');
+		}
+		
 		$this->methodCall = simplexml_load_string('<methodCall></methodCall>', null, LIBXML_NOERROR | LIBXML_NOWARNING);
 	}
 
